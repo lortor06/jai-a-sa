@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ใจอาสา & คำนวณ กยศ. · JaiArsa (Online Realtime Pro)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #212121; 
+    --paper: #F9FAFB; /* ปรับพื้นหลังให้ขาวสะอาดขึ้น */
+    --surface: #FFFFFF;
+    --primary: #E35205; /* KMITL Orange หลัก */
+    --primary-hover: #C64300; /* สีเมื่อเอาเมาส์ชี้ */
+    --primary-active: #A63800; /* สีเมื่อคลิก */
+    --primary-light: #FFF0E6;
+    --gold: #F26522; /* ส้มรองสำหรับปุ่มและส่วนเน้น */
+    --gold-hover: #D95619;
+    --gold-active: #BF4810;
+    --gold-light: #FFF5F0;
+    --rust: #D32F2F; 
+    --rust-light: #FFEBEE;
+    --text-secondary: #555555; 
+    --border: #E5E7EB;
+    --font-display: 'Kanit', sans-serif; 
+    --font-body: 'IBM Plex Sans Thai', sans-serif;
+    --radius: 8px;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--font-body); line-height: 1.55; }
+  h1, h2, h3, h4 { font-family: var(--font-display); margin: 0 0 8px 0; }
+  p { margin: 0 0 12px 0; color: var(--text-secondary); }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 0 20px; }
+
+  header.topbar { background: var(--primary); color: #FFFFFF; padding: 16px 0; border-bottom: 3px solid var(--primary-active); }
+  .topbar-inner { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand-mark {
+    width: 38px; height: 38px; border-radius: 50%; background: #FFFFFF;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display); font-weight: 700; color: var(--primary);
+  }
+  .brand-text h1 { font-size: 18px; color: #fff; margin: 0; }
+  .brand-text span { font-size: 12px; color: var(--primary-light); }
+  .topbar-controls { display: flex; gap: 8px; align-items: center; }
+
+  .pill-btn {
+    background: transparent; border: 1px solid var(--primary-light); color: #FFFFFF;
+    padding: 7px 14px; border-radius: 999px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all .15s ease;
+  }
+  .pill-btn:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
+  .pill-btn:active { background: var(--primary-active); border-color: var(--primary-active); }
+  
+  .user-badge { font-size: 14px; background: var(--primary-hover); padding: 6px 12px; border-radius: 999px; }
+
+  main { padding: 24px 0 60px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(227, 82, 5, 0.08); }
+  
+  button, input, select, textarea { touch-action: manipulation; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px; justify-content: center;
+    background: var(--paper); color: var(--ink); border: 1px solid var(--border); padding: 9px 16px;
+    border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; transition: background .15s ease, border-color .15s ease;
+  }
+  .btn:hover { background: #F3F4F6; }
+  .btn:active { background: #E5E7EB; }
+  
+  /* ปรับปุ่มหลักเป็นส้ม */
+  .btn.gold, #tabBtnActivities.gold, #tabBtnMyhours.gold, #tabBtnLoan.gold, 
+  #tabBtnActs.gold, #tabBtnApprovals.gold, #tabBtnMembers.gold, #tabBtnEvals.gold { 
+    background: var(--primary); color: #fff; font-weight: 600; border-color: var(--primary); 
+  }
+  .btn.gold:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
+  .btn.gold:active { background: var(--primary-active); border-color: var(--primary-active); }
+  
+  /* ปุ่มบันทึกหรือปุ่มหลักของระบบใช้สี Primary */
+  form button[type="submit"].btn.full, .btn[style*="background:var(--primary)"] {
+    background: var(--primary) !important; color: #fff; border: none;
+  }
+  form button[type="submit"].btn.full:hover, .btn[style*="background:var(--primary)"]:hover {
+    background: var(--primary-hover) !important;
+  }
+  form button[type="submit"].btn.full:active, .btn[style*="background:var(--primary)"]:active {
+    background: var(--primary-active) !important;
+  }
+
+  .btn.danger { background: transparent; color: var(--rust); border: 1px solid var(--rust-light); }
+  .btn.danger:hover { background: var(--rust-light); }
+  .btn.danger:active { background: #FFCDD2; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn.full { width: 100%; margin-top: 10px; min-height: 48px; font-size: 16px; }
+  .btn.small { padding: 6px 12px; font-size: 12px; }
+  
+  .btn-link { background: none; border: none; color: var(--primary); cursor: pointer; text-decoration: underline; font-family: var(--font-body); padding: 0; }
+  .btn-link:hover { color: var(--primary-hover); }
+  .btn-link:active { color: var(--primary-active); }
+
+  .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 640px) { .field-grid { grid-template-columns: 1fr; } }
+  .field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+  .field label { font-size: 13.5px; font-weight: 500; color: var(--ink); }
+  .field input, .field select, .field textarea { border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; font-size: 14px; font-family: var(--font-body); width: 100%; }
+  .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--primary); }
+  .checkbox-field { display: flex; align-items: center; gap: 8px; margin: 10px 0; cursor: pointer; }
+  .checkbox-field input { width: 18px; height: 18px; cursor: pointer; accent-color: var(--primary); }
+
+  .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+  @media (max-width: 850px) { .stat-row { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 500px) { .stat-row { grid-template-columns: 1fr; } }
+  
+  .stat-box { background: var(--primary-hover); color: #fff; border-radius: var(--radius); padding: 16px 18px; }
+  .stat-box .num { font-family: var(--font-display); font-size: 20px; font-weight: 600; }
+  .stat-box .label { font-size: 12px; color: var(--primary-light); }
+  .stat-box.gold { background: var(--gold); color: #fff; }
+  .stat-box.gold .label { color: var(--gold-light); }
+  .stat-box.rust { background: var(--rust); }
+  .stat-box.rust .label { color: #F2D8D2; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; margin-top: 10px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+  th { color: var(--text-secondary); font-weight: 600; background: #F3F4F6; }
+
+  .view-panel { display: none; }
+  .view-panel.active { display: block; }
+  .auth-box { max-width: 400px; margin: 40px auto; }
+  .text-center { text-align: center; }
+
+  .activity-item { border-bottom: 1px solid var(--border); padding: 12px 0; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap; }
+
+  #loadingOverlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(255,255,255,0.95); display: flex; justify-content: center; align-items: center;
+    z-index: 9999; font-size: 18px; font-weight: bold; color: var(--primary);
+    flex-direction: column; gap: 10px;
+  }
+
+  .print-only { display: none; }
+  @media print {
+    header.topbar, .user-tab-buttons, button, .no-print, #loadingOverlay, .filter-bar, #evalModal { display: none !important; }
+    body { background: #fff !important; color: #000 !important; }
+    .card { border: 1px solid #ccc !important; box-shadow: none !important; margin-bottom: 15px !important; }
+    .wrap { max-width: 100% !important; width: 100% !important; padding: 0 !important; }
+    .stat-box { border: 1px solid #aaa !important; color: #000 !important; background: #f9f9f9 !important; }
+    .stat-box .label { color: #444 !important; }
+    .print-only { display: block !important; }
+    .print-signature-box { display: flex !important; justify-content: space-between; align-items: flex-start; margin-top: 35px; padding-top: 15px; border-top: 1px dashed #aaa; }
+    
+    .is-rejected { display: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div id="loadingOverlay">
+  <div>🔄 กำลังเชื่อมต่อฐานข้อมูล Firebase...</div>
+  <span style="font-size: 13px; color: #666; font-weight: normal;">กรุณารอสักครู่ระบบกำลังดึงข้อมูลล่าสุด</span>
+</div>
+
+<!-- Modal สำหรับกรอกประเมินกิจกรรม (ส่วนผู้ใช้งาน) -->
+<div id="evalModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:99999; justify-content:center; align-items:center;">
+  <div class="card" style="max-width:480px; width:90%; background:#fff; margin:0; position:relative;">
+    <h3 id="evalModalTitle">ประเมินกิจกรรม</h3>
+    <p style="font-size:12.5px; color:var(--text-secondary); margin-bottom:14px;">กรอกแบบประเมินความพึงพอใจและแสดงความคิดเห็นต่อกิจกรรมนี้</p>
+    <form onsubmit="handleSaveEvaluation(event)">
+      <input type="hidden" id="eval_actId">
+      <div class="field">
+        <label>Rating : คะแนนการประเมินกิจกรรม (1–5)</label>
+        <select id="eval_rating" required>
+          <option value="5">⭐⭐⭐⭐⭐ (5 คะแนน - ดีมาก)</option>
+          <option value="4">⭐⭐⭐⭐ (4 คะแนน - ดี)</option>
+          <option value="3">⭐⭐⭐ (3 คะแนน - ปานกลาง)</option>
+          <option value="2">⭐⭐ (2 คะแนน - พอใช้)</option>
+          <option value="1">⭐ (1 คะแนน - ควรปรับปรุง)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Comment : ข้อเสนอแนะ</label>
+        <textarea id="eval_comment" rows="3" required style="width:100%; border:1px solid var(--border); border-radius:6px; padding:8px 10px; font-family:var(--font-body); font-size:14px;"></textarea>
+      </div>
+      <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:14px;">
+        <button type="button" class="btn danger small" onclick="closeEvalModal()">ยกเลิก</button>
+        <button type="submit" class="btn gold small">บันทึกการประเมิน</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <div class="brand">
+      <div class="brand-mark">ใจ</div>
+      <div class="brand-text">
+        <h1>ใจอาสา & คำนวณ กยศ.</h1>
+        <span>ระบบบันทึกชั่วโมงจิตอาสา และวางแผนภาระหนี้ กยศ. (Online)</span>
+      </div>
+    </div>
+    <div class="topbar-controls">
+      <span id="userInfo" class="user-badge" style="display:none;"></span>
+      <button class="pill-btn danger" id="btnLogout" onclick="handleLogout()" style="display:none;">ออกจากระบบ</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <input type="file" id="proofFileInput" accept="image/*" style="display:none;">
+
+  <!-- AUTH VIEW -->
+  <section id="authView" class="view-panel active">
+    <div class="auth-box">
+      <!-- LOGIN -->
+      <div class="card" id="loginCard">
+        <h2 class="text-center" style="color:var(--primary);">เข้าสู่ระบบ</h2>
+        <form onsubmit="handleLogin(event)" novalidate>
+          <div class="field">
+            <label>ชื่อผู้ใช้งาน (Username)</label>
+            <input type="text" id="login_username" required>
+          </div>
+          <div class="field" style="margin-bottom: 4px;">
+            <label>รหัสผ่าน (Password)</label>
+            <input type="password" id="login_password" required>
+          </div>
+          <div style="text-align: right; margin-bottom: 14px;">
+            <button type="button" class="btn-link" style="font-size: 12.5px; color: var(--text-secondary);" onclick="toggleAuth('forgot')">ลืมรหัสผ่าน?</button>
+          </div>
+          <button type="submit" class="btn full" style="background:var(--primary);">เข้าสู่ระบบ</button>
+        </form>
+        <p class="text-center" style="margin-top:16px;">
+          ยังไม่มีบัญชีใช่หรือไม่? 
+          <button class="btn-link" onclick="toggleAuth('register')">สมัครสมาชิก</button>
+        </p>
+      </div>
+
+      <!-- REGISTER -->
+      <div class="card" id="registerCard" style="display:none;">
+        <h2 class="text-center" style="color:var(--primary);">สมัครสมาชิก (นักศึกษา)</h2>
+        <form id="regForm" onsubmit="handleRegister(event)" novalidate>
+          <div class="field">
+            <label>รหัสนักศึกษา</label>
+            <input type="text" id="reg_studentid" placeholder="เช่น 67010001" required>
+          </div>
+          <div class="field">
+            <label>ชื่อ-นามสกุล</label>
+            <input type="text" id="reg_name" placeholder="เช่น นายสมชาย ขยันเรียน" required>
+          </div>
+          <div class="field">
+            <label>อีเมลสถาบัน (@kmitl.ac.th)</label>
+            <input type="email" id="reg_email" placeholder="67xxxxxx@kmitl.ac.th" required>
+          </div>
+          <div class="field">
+            <label>ชื่อผู้ใช้งาน (Username)</label>
+            <input type="text" id="reg_username" placeholder="เช่น std6701" required>
+          </div>
+          <div class="field">
+            <label>สร้างรหัสผ่าน (Password)</label>
+            <input type="password" id="reg_password" placeholder="เช่น Pass1234" required>
+          </div>
+          <div class="field">
+            <label>ยืนยันรหัสผ่านอีกครั้ง</label>
+            <input type="password" id="reg_password_confirm" placeholder="กรอกรหัสผ่านซ้ำอีกครั้ง" required>
+          </div>
+          <button type="submit" class="btn full" style="background:var(--primary);">ยืนยันสมัครสมาชิก</button>
+        </form>
+        <p class="text-center" style="margin-top:16px;">
+          <button class="btn-link" onclick="toggleAuth('login')">กลับไปหน้าเข้าสู่ระบบ</button>
+        </p>
+      </div>
+
+      <!-- FORGOT PASSWORD -->
+      <div class="card" id="forgotCard" style="display:none;">
+        <h2 class="text-center" style="color:var(--primary);">ตั้งรหัสผ่านใหม่</h2>
+        <form onsubmit="handleResetPassword(event)" novalidate>
+          <div class="field">
+            <label>อีเมลสถาบัน (@kmitl.ac.th)</label>
+            <input type="email" id="reset_email" required>
+          </div>
+          <div class="field">
+            <label>รหัสนักศึกษา (ยืนยันตัวตน)</label>
+            <input type="text" id="reset_studentid" required>
+          </div>
+          <div class="field">
+            <label>รหัสผ่านใหม่</label>
+            <input type="password" id="reset_password" required>
+          </div>
+          <button type="submit" class="btn full" style="background:var(--primary);">เปลี่ยนรหัสผ่าน</button>
+        </form>
+        <p class="text-center" style="margin-top:16px;">
+          <button class="btn-link" onclick="toggleAuth('login')">« กลับไปหน้าเข้าสู่ระบบ</button>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- USER VIEW -->
+  <section id="userView" class="view-panel">
+    <div class="user-tab-buttons" style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
+      <button class="btn gold" id="tabBtnActivities" onclick="switchUserTab('activities')">กิจกรรมทั้งหมด</button>
+      <button class="btn" id="tabBtnMyhours" onclick="switchUserTab('myhours')">ชั่วโมงสะสมของฉัน</button>
+      <button class="btn" id="tabBtnLoan" onclick="switchUserTab('loan')">คำนวณยอดหนี้ กยศ.</button>
+    </div>
+
+    <div id="tabActivities" class="user-tab">
+      <div class="card">
+        <h3>กิจกรรมจิตอาสาที่เปิดให้เข้าร่วม</h3>
+        <p>เลือกกิจกรรมและอัปโหลดภาพหลักฐานเพื่อบันทึกชั่วโมง (สามารถบันทึกได้ตั้งแต่วันทำกิจกรรม จนถึงไม่เกิน 7 วันหลังเข้าร่วม)</p>
+        <div id="userActivityList"></div>
+      </div>
+    </div>
+
+    <div id="tabMyhours" class="user-tab" style="display:none;">
+      <div class="print-only" style="text-align:center; margin-bottom:15px; border-bottom:2px solid #000; padding-bottom:10px;">
+        <h2 style="margin:0;">ใบรับรองการเข้าร่วมกิจกรรมจิตอาสา (กยศ.)</h2>
+        <span style="font-size:13px; color:#444;">สถาบันเทคโนโลยีพระจอมเกล้าเจ้าคุณทหารลาดกระบัง · ระบบ JaiArsa Online</span>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; flex-wrap:wrap; gap:10px;">
+        <div>
+          <h3 style="margin:0;">สรุปชั่วโมงจิตอาสาของฉัน</h3>
+          <div id="myStudentInfo" style="font-size:13.5px; color:var(--text-secondary); margin-top:4px;"></div>
+        </div>
+        <button class="btn gold small no-print" onclick="printOfficialDocument()">🖨️ พิมพ์เอกสารสรุป</button>
+      </div>
+
+      <div class="stat-row" style="grid-template-columns: repeat(2, 1fr);">
+        <div class="stat-box">
+          <div class="num" id="statTotalHours">0</div>
+          <div class="label">ชั่วโมงที่อนุมัติแล้ว</div>
+        </div>
+        <div class="stat-box gold">
+          <div class="num" id="statTotalActivities">0</div>
+          <div class="label">กิจกรรมที่เข้าร่วมทั้งหมด</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
+          <h3 style="margin:0;">ประวัติการเข้าร่วมกิจกรรมและสถานะ</h3>
+          
+          <div class="filter-bar no-print" style="display:flex; gap:4px; flex-wrap:wrap;">
+            <button class="btn small gold" id="filterBtnAll" onclick="filterMyHours('all')">ทั้งหมด</button>
+            <button class="btn small" id="filterBtnApproved" onclick="filterMyHours('approved')">✅ อนุมัติแล้ว</button>
+            <button class="btn small" id="filterBtnPending" onclick="filterMyHours('pending')">⏳ รอตรวจสอบ</button>
+            <button class="btn small" id="filterBtnRejected" onclick="filterMyHours('rejected')">❌ ไม่อนุมัติ</button>
+          </div>
+        </div>
+
+        <div id="myHoursList"></div>
+
+        <div class="print-only print-signature-box">
+          <div style="text-align:center; width:45%;">
+            <p style="margin-bottom:45px;">ลงชื่อ..........................................................<br>(<span id="printStudentNameSign">..........................................................</span>)<br>นักศึกษาผู้ขอรับรอง</p>
+            <p style="font-size:11px; color:#555;" id="printTimeStamp"></p>
+          </div>
+          <div style="text-align:center; width:45%;">
+            <p style="margin-bottom:45px;">ลงชื่อ..........................................................<br>(..........................................................)<br>อาจารย์ที่ปรึกษา / เจ้าหน้าที่ผู้ตรวจสอบ</p>
+            <p style="font-size:11px; color:#555;">วันที่ ......... / ......... / .............</p>
+          </div>
+          <div style="text-align:center; width:100%; margin-top:15px; display:flex; flex-direction:column; align-items:center;">
+            <img id="printQrCode" src="" style="width:85px; height:85px; margin-bottom:4px; display:block; border:1px solid #ccc;" alt="QR Verification">
+            <span style="font-size:10px; color:#666;">รหัสตรวจสอบเอกสาร (Scan to Verify)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOAN CALCULATOR -->
+    <div id="tabLoan" class="user-tab" style="display:none;">
+      <div class="card">
+        <h3>ระบบวางแผนและคำนวณยอดหนี้ กยศ.</h3>
+        <form id="loanForm" onsubmit="handleCalculateLoan(event)">
+          <div class="field-grid">
+            <div class="field">
+              <label>รหัสนักศึกษา</label>
+              <input type="text" id="l_studentId" required readonly style="background:#f0f0f0;">
+            </div>
+            <div class="field">
+              <label>ค่าเทอม (บาท / ภาคเรียน)</label>
+              <input type="number" id="l_tuition" min="0" step="500" value="19000" required>
+            </div>
+          </div>
+          <div class="field-grid">
+            <div class="field">
+              <label>เริ่มกู้ตั้งแต่ชั้นปีที่</label>
+              <select id="l_currentYear" required></select>
+            </div>
+            <div class="field">
+              <label>คำนวณจนถึงชั้นปีที่ (สำเร็จการศึกษา)</label>
+              <select id="l_targetYear" required></select>
+            </div>
+          </div>
+          <label class="checkbox-field">
+            <input type="checkbox" id="l_includeLiving" checked>
+            <span style="font-size:14px; font-weight:500;">กู้ค่าครองชีพรายเดือน (3,000 บาท/เดือน)</span>
+          </label>
+          <button type="submit" class="btn gold" style="margin-top:10px;">คำนวณยอดหนี้ทั้งหมด</button>
+        </form>
+      </div>
+
+      <div id="loanResults" style="display:none;">
+        <div class="stat-row">
+          <div class="stat-box rust">
+            <div class="num" id="resFutureDebt">0 บาท</div>
+            <div class="label">ยอดหนี้เงินต้นสะสมเมื่อจบการศึกษา</div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>ตารางจำลองการผ่อนชำระคืน กยศ. (ระยะเวลา 15 ปี)</h3>
+          <div style="overflow-x:auto; max-height:400px;">
+            <table>
+              <thead>
+                <tr>
+                  <th>ปีผ่อนชำระ</th>
+                  <th>เงินต้นที่ต้องชำระ (บาท)</th>
+                  <th>ดอกเบี้ย (1%) (บาท)</th>
+                  <th>รวมยอดต้องชำระต่อปี (บาท)</th>
+                  <th>ยอดหนี้คงเหลือ (บาท)</th>
+                </tr>
+              </thead>
+              <tbody id="repaymentTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ADMIN VIEW -->
+  <section id="adminView" class="view-panel">
+    <div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
+      <button class="btn gold" id="tabBtnActs" onclick="switchAdminTab('acts')">จัดการกิจกรรม</button>
+      <button class="btn" id="tabBtnApprovals" onclick="switchAdminTab('approvals')">อนุมัติกิจกรรม <span id="pendingBadge" style="background:var(--rust); color:#fff; padding:2px 6px; border-radius:10px; font-size:11px; margin-left:4px; display:none;">0</span></button>
+      <button class="btn" id="tabBtnMembers" onclick="switchAdminTab('members')">ข้อมูลนักศึกษา</button>
+      <button class="btn" id="tabBtnEvals" onclick="switchAdminTab('evals')">⭐ ตรวจสอบการประเมิน</button>
+    </div>
+
+    <div id="adminTabActs" class="admin-tab">
+      <div class="card">
+        <h3>เพิ่มกิจกรรมจิตอาสาใหม่</h3>
+        <form id="activityForm" onsubmit="handleSaveActivity(event)">
+          <div class="field-grid">
+            <div class="field">
+              <label>ชื่อกิจกรรม</label>
+              <input type="text" id="f_title_th" required>
+            </div>
+            <div class="field">
+              <label>ชั่วโมงจิตอาสา</label>
+              <input type="number" id="f_hours" min="0.5" step="0.5" required>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>สถานที่จัดกิจกรรม</label>
+            <input type="text" id="f_location" placeholder="เช่น ลานพระจอมเกล้า, อาคารเรียนรวม" required>
+          </div>
+
+          <div class="field-grid">
+            <div class="field">
+              <label>วันที่จัดกิจกรรม</label>
+              <input type="date" id="f_date" required>
+            </div>
+            <div class="field">
+              <label>เวลา (เริ่ม - สิ้นสุด)</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="time" id="f_time_start" required>
+                <input type="time" id="f_time_end" required>
+              </div>
+            </div>
+          </div>
+          <div class="field" style="margin-top: 4px; margin-bottom: 14px;">
+            <label>รายละเอียดกิจกรรม</label>
+            <textarea id="f_details" rows="3" placeholder="ระบุรายละเอียด..." style="width: 100%; border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; font-family: var(--font-body); font-size: 14px;" required></textarea>
+          </div>
+          <button type="submit" class="btn gold">บันทึกกิจกรรม</button>
+        </form>
+      </div>
+      <div class="card">
+        <h3>รายการกิจกรรมทั้งหมดในระบบ</h3>
+        <div id="adminActivityList"></div>
+      </div>
+    </div>
+
+    <div id="adminTabApprovals" class="admin-tab" style="display:none;">
+      <div class="card">
+        <h3>รายการรออนุมัติชั่วโมงกิจกรรม</h3>
+        <div id="adminApprovalList"></div>
+      </div>
+    </div>
+
+    <div id="adminTabMembers" class="admin-tab" style="display:none;">
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
+          <h3 style="margin:0;">รายชื่อนักศึกษาที่อยู่ในระบบทั้งหมด</h3>
+          <button class="btn gold small" onclick="exportMembersToCSV()">📥 ส่งออกข้อมูลสรุป (CSV)</button>
+        </div>
+        
+        <div class="field" style="margin-bottom:14px;">
+          <input type="text" id="searchMemberInput" placeholder="🔍 ค้นหาด้วยชื่อ หรือ รหัสนักศึกษา..." oninput="renderMembers()">
+        </div>
+        <div id="adminMemberList"></div>
+      </div>
+    </div>
+
+    <div id="adminTabEvals" class="admin-tab" style="display:none;">
+      <div class="card">
+        <h3>ตรวจสอบการประเมินกิจกรรมที่ผู้เข้าร่วมได้ให้ไว้</h3>
+        <p>แสดงรายการกิจกรรม คะแนนการประเมิน (Rating 1–5) และความคิดเห็น (Comment) จากผู้เข้าร่วม</p>
+        <div id="adminEvalList"></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Firebase SDK Module -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+  import { getDatabase, ref, set, push, get, child, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAIW3Fis2SxywEFDA_LbWLpBuvG1u1uK_8",
+    authDomain: "jai-a-sa.firebaseapp.com",
+    databaseURL: "https://jai-a-sa-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "jai-a-sa",
+    storageBucket: "jai-a-sa.firebasestorage.app",
+    messagingSenderId: "984030046072",
+    appId: "1:984030046072:web:e0d560bdf58e4783d10a8d",
+    measurementId: "G-MYZJ7XKS29"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  let usersDB = {};
+  let activitiesDB = {};
+  let logsDB = {};
+  let evaluationsDB = {};
+  let currentUser = JSON.parse(sessionStorage.getItem('ja_currentUser')) || null;
+  let currentJoiningActId = null;
+  let activeLogFilter = 'all';
+
+  // Realtime Data Sync Engine
+  onValue(ref(db, 'users'), (snapshot) => { 
+    usersDB = snapshot.val() || {}; 
+    renderApp(); 
+  });
+  
+  onValue(ref(db, 'activities'), (snapshot) => { 
+    activitiesDB = snapshot.val() || {}; 
+    renderApp(); 
+  });
+
+  onValue(ref(db, 'evaluations'), (snapshot) => {
+    evaluationsDB = snapshot.val() || {};
+    renderApp();
+  });
+  
+  onValue(ref(db, 'logs'), (snapshot) => { 
+    logsDB = snapshot.val() || {}; 
+    document.getElementById('loadingOverlay').style.display = 'none';
+    renderApp(); 
+  }, (error) => {
+    console.error("Firebase Sync Error:", error);
+    document.getElementById('loadingOverlay').style.display = 'none';
+  });
+
+  get(child(ref(db), 'users')).then((snapshot) => {
+    if (!snapshot.exists()) {
+      set(ref(db, 'users/admin_default'), { 
+        username: 'admin', 
+        password: '1234', 
+        role: 'admin', 
+        name: 'System Admin', 
+        studentId: 'ADMIN', 
+        email: 'admin@kmitl.ac.th' 
+      });
+    }
+  });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    populateYearDropdowns();
+    checkAuth();
+    
+    document.getElementById('proofFileInput').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if(!file || !currentJoiningActId) return;
+
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 400;
+          const scaleSize = MAX_WIDTH / img.width;
+          canvas.width = MAX_WIDTH; 
+          canvas.height = img.height * scaleSize;
+          
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.6);
+          window.saveActivityProof(compressedDataUrl);
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  });
+
+  function populateYearDropdowns() {
+    const cSelect = document.getElementById('l_currentYear');
+    const tSelect = document.getElementById('l_targetYear');
+    if(!cSelect) return;
+    for (let i = 1; i <= 6; i++) {
+      cSelect.appendChild(new Option('ชั้นปีที่ ' + i, i));
+      tSelect.appendChild(new Option('ชั้นปีที่ ' + i, i));
+    }
+    cSelect.value = 1; tSelect.value = 4;
+  }
+
+  // Window Bindings
+  window.toggleAuth = function(type) {
+    ['loginCard','registerCard','forgotCard'].forEach(id => document.getElementById(id).style.display = 'none');
+    document.getElementById(type+'Card').style.display = 'block';
+  }
+
+  window.handleLogin = function(e) {
+    e.preventDefault();
+    const u = document.getElementById('login_username').value.trim();
+    const p = document.getElementById('login_password').value.trim();
+    
+    let foundUser = null;
+    let userId = null;
+    for (const [key, user] of Object.entries(usersDB)) {
+      if (user.username === u && user.password === p) { 
+        foundUser = user; 
+        userId = key; 
+        break; 
+      }
+    }
+
+    if (foundUser) {
+      currentUser = { uid: userId, ...foundUser };
+      sessionStorage.setItem('ja_currentUser', JSON.stringify(currentUser));
+      checkAuth();
+    } else {
+      alert('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!');
+    }
+  }
+
+  window.handleRegister = function(e) {
+    e.preventDefault();
+    const studentId = document.getElementById('reg_studentid').value.trim();
+    const name = document.getElementById('reg_name').value.trim();
+    const email = document.getElementById('reg_email').value.trim();
+    const username = document.getElementById('reg_username').value.trim();
+    const password = document.getElementById('reg_password').value;
+    const confirmPassword = document.getElementById('reg_password_confirm')?.value;
+
+    if(!email.endsWith('@kmitl.ac.th')) {
+      return alert('กรุณาใช้อีเมลสถาบัน (@kmitl.ac.th) เท่านั้น!');
+    }
+
+    for (const user of Object.values(usersDB)) {
+      if (user.username.toLowerCase() === username.toLowerCase()) {
+        return alert('ชื่อผู้ใช้นี้ถูกใช้งานแล้วในระบบ!');
+      }
+    }
+
+    if(confirmPassword && password !== confirmPassword) {
+      return alert('รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน!');
+    }
+
+    push(ref(db, 'users'), { username, password, role: 'user', name, studentId, email }).then(() => {
+      alert('สมัครสมาชิกสำเร็จ! ข้อมูลถูกส่งไปที่ฐานข้อมูลแล้ว');
+      document.getElementById('regForm').reset();
+      window.toggleAuth('login');
+    }).catch(err => alert('เกิดข้อผิดพลาด: ' + err.message));
+  }
+
+  window.handleResetPassword = function(e) { 
+    e.preventDefault();
+    const email = document.getElementById('reset_email').value.trim();
+    const studentId = document.getElementById('reset_studentid').value.trim();
+    const newPassword = document.getElementById('reset_password').value.trim();
+
+    let targetUserId = null;
+    for (const [key, user] of Object.entries(usersDB)) {
+      if (user.email === email && user.studentId === studentId) { targetUserId = key; break; }
+    }
+
+    if (!targetUserId) return alert('ไม่พบข้อมูลที่ตรงกับอีเมลและรหัสนักศึกษานี้');
+
+    update(ref(db, 'users/' + targetUserId), { password: newPassword }).then(() => {
+      alert('เปลี่ยนรหัสผ่านเรียบร้อยแล้ว'); 
+      window.toggleAuth('login'); 
+    });
+  }
+
+  window.handleLogout = function() { 
+    currentUser = null; 
+    sessionStorage.removeItem('ja_currentUser'); 
+    checkAuth(); 
+  }
+
+  function checkAuth() {
+    document.querySelectorAll('.view-panel').forEach(el => el.classList.remove('active'));
+    if (!currentUser) {
+      document.getElementById('authView').classList.add('active');
+      document.getElementById('btnLogout').style.display = 'none';
+      document.getElementById('userInfo').style.display = 'none';
+      window.toggleAuth('login');
+    } else {
+      document.getElementById('btnLogout').style.display = 'block';
+      document.getElementById('userInfo').style.display = 'block';
+      document.getElementById('userInfo').textContent = `👤 ${currentUser.name}`;
+      if (currentUser.role === 'admin') {
+        document.getElementById('adminView').classList.add('active'); 
+        window.switchAdminTab('acts');
+      } else {
+        document.getElementById('userView').classList.add('active');
+        document.getElementById('l_studentId').value = currentUser.studentId;
+        window.switchUserTab('activities');
+      }
+      renderApp();
+    }
+  }
+
+  function renderApp() {
+    if (!currentUser) return;
+    if (currentUser.role === 'admin') { 
+      renderAdminActivities(); 
+      renderApprovals(); 
+      renderMembers(); 
+      renderAdminEvaluations();
+    } else { 
+      renderUserActivities(); 
+      renderMyHours(); 
+    }
+  }
+
+  window.switchUserTab = function(tab) {
+    document.querySelectorAll('.user-tab').forEach(t => t.style.display = 'none');
+    document.getElementById(`tab${tab.charAt(0).toUpperCase() + tab.slice(1)}`).style.display = 'block';
+    ['Activities','Myhours','Loan'].forEach(t => document.getElementById(`tabBtn${t}`).classList.remove('gold'));
+    document.getElementById(`tabBtn${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.add('gold');
+  }
+
+  window.switchAdminTab = function(tab) {
+    document.querySelectorAll('.admin-tab').forEach(t => t.style.display = 'none');
+    document.getElementById('adminTab' + tab.charAt(0).toUpperCase() + tab.slice(1)).style.display = 'block';
+    ['Acts','Approvals','Members','Evals'].forEach(t => {
+      const btn = document.getElementById('tabBtn' + t);
+      if(btn) btn.classList.remove('gold');
+    });
+    document.getElementById('tabBtn' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('gold');
+  }
+
+  // Admin Functions
+  window.handleSaveActivity = function(e) {
+    e.preventDefault();
+    push(ref(db, 'activities'), {
+      titleTh: document.getElementById('f_title_th').value.trim(),
+      location: document.getElementById('f_location').value.trim(),
+      date: document.getElementById('f_date').value,
+      timeStart: document.getElementById('f_time_start').value,
+      timeEnd: document.getElementById('f_time_end').value,
+      details: document.getElementById('f_details').value.trim(),
+      hours: parseFloat(document.getElementById('f_hours').value),
+      timestamp: Date.now()
+    }).then(() => {
+      alert('เพิ่มกิจกรรมสำเร็จ!');
+      document.getElementById('activityForm').reset();
+    }).catch(err => alert('เกิดข้อผิดพลาด: ' + err.message));
+  }
+
+  window.deleteActivity = function(actId) {
+    if (confirm('คุณต้องการลบกิจกรรมนี้ใช่หรือไม่? ข้อมูลประวัติการเข้าร่วมกิจกรรมนี้ทั้งหมดจะถูกลบออกด้วย')) {
+      set(ref(db, 'activities/' + actId), null).then(() => {
+        const updates = {};
+        Object.entries(logsDB).forEach(([logId, log]) => {
+          if (log.activityId === actId) {
+            updates['logs/' + logId] = null;
+          }
+        });
+        Object.entries(evaluationsDB).forEach(([evalId, ev]) => {
+          if (ev.activityId === actId) {
+            updates['evaluations/' + evalId] = null;
+          }
+        });
+        if (Object.keys(updates).length > 0) {
+          update(ref(db), updates);
+        }
+        alert('ลบกิจกรรมเรียบร้อยแล้ว');
+      }).catch(err => alert('เกิดข้อผิดพลาด: ' + err.message));
+    }
+  }
+
+  function renderAdminActivities() {
+    const actArray = Object.entries(activitiesDB).sort((a,b) => b[1].timestamp - a[1].timestamp);
+    if(actArray.length === 0) {
+      document.getElementById('adminActivityList').innerHTML = '<p style="text-align:center;">ยังไม่มีกิจกรรมในระบบ</p>';
+      return;
+    }
+    document.getElementById('adminActivityList').innerHTML = actArray.map(([id, a]) => `
+      <div class="activity-item" style="align-items:flex-start;">
+        <div>
+          <h4 style="margin:0; color:var(--primary);">${a.titleTh}</h4>
+          <div style="font-size:12.5px; color:var(--text-secondary); margin-top:4px;">
+            📍 สถานที่: <strong>${a.location || '-'}</strong><br>
+            📅 ${a.date} | ⏰ ${a.timeStart || a.time} - ${a.timeEnd || '?'} น.<br>
+            📝 ${a.details || '-'}
+          </div>
+        </div>
+        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
+          <span style="color:var(--primary); font-weight:bold;">⭐ ${a.hours} ชม.</span>
+          <button class="btn danger small" onclick="deleteActivity('${id}')">🗑️ ลบกิจกรรม</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function renderApprovals() { 
+    const pendingLogs = Object.entries(logsDB).filter(([id, log]) => log.status === 'pending' && activitiesDB[log.activityId]);
+    const badge = document.getElementById('pendingBadge');
+    
+    if(pendingLogs.length > 0) { 
+      badge.style.display = 'inline-block'; 
+      badge.textContent = pendingLogs.length; 
+    } else { 
+      badge.style.display = 'none'; 
+    }
+
+    if (pendingLogs.length === 0) {
+      return document.getElementById('adminApprovalList').innerHTML = '<p style="text-align:center;">ไม่มีรายการรออนุมัติ</p>';
+    }
+
+    document.getElementById('adminApprovalList').innerHTML = pendingLogs.map(([id, log]) => `
+      <div style="border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 10px; background:#fff;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:12px; flex-wrap:wrap; gap:10px;">
+          <div>
+            <h4 style="margin:0; color:var(--primary);">${log.titleTh}</h4>
+            <div style="font-size:13px; color:var(--text-secondary); margin-top:4px;">
+              👤 ผู้ส่ง: <strong>${log.studentName}</strong> (รหัส: ${log.studentId})<br>
+              <div style="margin-top:6px;"><a href="${log.proof}" target="_blank"><img src="${log.proof}" style="max-height:80px; border-radius:4px; border:1px solid #ccc;"></a></div>
+            </div>
+          </div>
+          <div style="text-align:right; font-weight:600; color:var(--primary);">⭐ ${log.hours} ชม.</div>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn small" style="background:var(--primary); border:none; color:#fff;" onclick="updateLogStatus('${id}', 'approved')">✅ อนุมัติ</button>
+          <button class="btn danger small" onclick="updateLogStatus('${id}', 'rejected')">❌ ไม่อนุมัติ</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  window.updateLogStatus = function(logId, status) { 
+    let rejectReason = '';
+    if (status === 'rejected') {
+      rejectReason = prompt('กรุณาระบุเหตุผลที่ไม่ให้อนุมัติกิจกรรมนี้:') || 'ภาพหลักฐานไม่ตรงกับกิจกรรม';
+    }
+    update(ref(db, 'logs/' + logId), { status, rejectReason }); 
+  }
+
+  function renderMembers() {
+    const allStudents = Object.entries(usersDB).filter(([id, user]) => user.role === 'user');
+
+    if (allStudents.length === 0) {
+      document.getElementById('adminMemberList').innerHTML = '<p style="text-align:center;">ยังไม่มีนักศึกษาสมัครสมาชิก</p>';
+      return;
+    }
+
+    const search = (document.getElementById('searchMemberInput')?.value || '').toLowerCase();
+    const studentEntries = allStudents.filter(([id, student]) => {
+      return (student.name?.toLowerCase().includes(search) || student.studentId?.toLowerCase().includes(search));
+    });
+
+    if (studentEntries.length === 0) {
+      document.getElementById('adminMemberList').innerHTML = '<p style="text-align:center;">ไม่พบข้อมูลนักศึกษาที่ตรงกับการค้นหา</p>';
+      return;
+    }
+
+    document.getElementById('adminMemberList').innerHTML = studentEntries.map(([uid, student]) => {
+      const approvedHours = Object.values(logsDB)
+        .filter(log => log.studentId === student.studentId && log.status === 'approved' && activitiesDB[log.activityId])
+        .reduce((sum, log) => sum + (parseFloat(log.hours) || 0), 0);
+      return `
+        <div style="border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 10px; background: #fff; display: flex; justify-content: space-between; align-items: center; flex-wrap:wrap; gap:10px;">
+          <div>
+            <h4 style="margin: 0; color:var(--primary);">${student.name}</h4>
+            <div style="font-size: 13px; color: var(--text-secondary);">🆔 รหัส: ${student.studentId} | ✉️ ${student.email}</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span style="background: var(--primary-light); color: var(--primary); font-weight: 600; font-size: 13.5px; padding: 6px 12px; border-radius: 999px;">⭐ สะสม ${approvedHours} ชม.</span>
+            <button class="btn danger small" onclick="deleteUser('${uid}')">🗑️ ลบสมาชิก</button>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function renderAdminEvaluations() {
+    const container = document.getElementById('adminEvalList');
+    if (!container) return;
+
+    const evalArray = Object.entries(evaluationsDB).sort((a,b) => (b[1].timestamp || 0) - (a[1].timestamp || 0));
+    
+    if (evalArray.length === 0) {
+      container.innerHTML = '<p style="text-align:center;">ยังไม่มีผลการประเมินกิจกรรมจากผู้เข้าร่วม</p>';
+      return;
+    }
+
+    container.innerHTML = evalArray.map(([id, ev]) => {
+      const act = activitiesDB[ev.activityId] || {};
+      const title = ev.titleTh || act.titleTh || 'กิจกรรม';
+      const details = act.details || 'ไม่มีรายละเอียดกิจกรรม';
+      const stars = '⭐'.repeat(ev.rating || 5);
+
+      return `
+        <div style="border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 12px; background: #fff;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px;">
+            <div style="max-width:70%;">
+              <h4 style="margin:0; color:var(--primary);">${title}</h4>
+              <div style="font-size:13px; color:var(--text-secondary); margin-top:4px;">
+                📝 <strong>รายละเอียดกิจกรรม:</strong> ${details}
+              </div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:15px; font-weight:bold; color:var(--primary);">${ev.rating}/5 ${stars}</div>
+              <div style="font-size:11.5px; color:#666; margin-top:2px;">ผู้ประเมิน: ${ev.studentName} (${ev.studentId})</div>
+            </div>
+          </div>
+          <div style="margin-top:12px; background: var(--paper); padding:10px 12px; border-radius:6px; font-size:13.5px; border-left:3px solid var(--primary);">
+            💬 <strong>Comment : ความคิดเห็นที่ผู้เข้าร่วมกรอกไว้ :</strong> ${ev.comment || '-'}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  window.exportMembersToCSV = function() {
+    const allStudents = Object.entries(usersDB).filter(([id, user]) => user.role === 'user');
+    if (allStudents.length === 0) return alert('ไม่มีข้อมูลนักศึกษาให้ส่งออก');
+    
+    let csvContent = "\uFEFFลำดับ,รหัสนักศึกษา,ชื่อ-นามสกุล,อีเมล,ชั่วโมงจิตอาสาอนุมัติแล้ว (ชม.)\n";
+    
+    allStudents.forEach(([uid, student], index) => {
+      const approvedHours = Object.values(logsDB)
+        .filter(log => log.studentId === student.studentId && log.status === 'approved' && activitiesDB[log.activityId])
+        .reduce((sum, log) => sum + (parseFloat(log.hours) || 0), 0);
+      csvContent += `"${index + 1}","${student.studentId}","${student.name}","${student.email}","${approvedHours}"\n`;
+    });
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.setAttribute("download", `รายงานสรุปชั่วโมงจิตอาสา_${new Date().toLocaleDateString('th-TH').replace(/\//g, '-')}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  window.deleteUser = function(userId) {
+    if (confirm('คุณต้องการลบสมาชิกคนนี้ออกจากระบบใช่หรือไม่?')) {
+      set(ref(db, 'users/' + userId), null).then(() => {
+        alert('ลบข้อมูลสมาชิกเรียบร้อยแล้ว');
+      }).catch(err => alert('เกิดข้อผิดพลาด: ' + err.message));
+    }
+  }
+
+  // User Functions
+  function renderUserActivities() { 
+    const actArray = Object.entries(activitiesDB).sort((a,b) => b[1].timestamp - a[1].timestamp);
+    if(actArray.length === 0) {
+      document.getElementById('userActivityList').innerHTML = '<p style="text-align:center;">ยังไม่มีกิจกรรมเปิดให้เข้าร่วม</p>';
+      return;
+    }
+
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    document.getElementById('userActivityList').innerHTML = actArray.map(([id, a]) => {
+      const actDate = new Date(a.date);
+      actDate.setHours(0,0,0,0);
+      
+      const diffTime = today.getTime() - actDate.getTime();
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+      const isSubmitted = Object.values(logsDB).some(
+        l => l.activityId === id && l.studentId === (currentUser ? currentUser.studentId : '')
+      );
+
+      let btnHtml = '';
+      let dateNotice = '';
+
+      if (isSubmitted) {
+        btnHtml = `<button class="btn small" disabled style="background:#E5E7EB; cursor:not-allowed; border:none;">✅ ส่งแล้ว</button>`;
+        dateNotice = `<span style="color:var(--primary); font-size:11.5px; display:block; margin-top:2px;">(ส่งหลักฐานเรียบร้อยแล้ว)</span>`;
+      } else if (diffDays < 0) {
+        btnHtml = `<button class="btn small" disabled style="background:#E5E7EB; cursor:not-allowed; border:none;">⏳ ยังไม่ถึงวันจัดกิจกรรม</button>`;
+        dateNotice = `<span style="color:var(--gold); font-size:11.5px; display:block; margin-top:2px;">(เปิดให้บันทึกในวันที่ ${a.date})</span>`;
+      } else if (diffDays > 7) {
+        btnHtml = `<button class="btn small danger" disabled style="cursor:not-allowed; opacity:0.6;">⛔ เลยกำหนด 7 วันแล้ว</button>`;
+        dateNotice = `<span style="color:var(--rust); font-size:11.5px; display:block; margin-top:2px;">(หมดเขตส่งเมื่อ ${new Date(actDate.getTime() + 7*24*60*60*1000).toLocaleDateString('th-TH')})</span>`;
+      } else {
+        btnHtml = `<button class="btn small" onclick="joinActivity('${id}')" style="background:var(--primary); color:#fff; border:none;">ส่งภาพหลักฐาน</button>`;
+        dateNotice = `<span style="color:var(--primary); font-size:11.5px; display:block; margin-top:2px;">(สามารถส่งหลักฐานได้อีก ${7 - diffDays} วัน)</span>`;
+      }
+
+      return `
+        <div class="activity-item" style="align-items:flex-start;">
+          <div>
+            <h4 style="margin:0; color:var(--primary);">${a.titleTh}</h4>
+            <div style="font-size:12px; color:var(--text-secondary); margin-top:4px;">
+              📍 สถานที่: <strong>${a.location || '-'}</strong><br>
+              📅 ${a.date} | ⏰ ${a.timeStart || a.time} - ${a.timeEnd || '?'} น.<br>
+              📝 ${a.details || '-'}
+              ${dateNotice}
+            </div>
+          </div>
+          <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
+            <span style="color:var(--primary); font-size:14px; font-weight:bold;">⭐ ${a.hours} ชม.</span>
+            ${btnHtml}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  window.joinActivity = function(actId) {
+    const act = activitiesDB[actId];
+    if (!act) return;
+
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    
+    const actDate = new Date(act.date);
+    actDate.setHours(0,0,0,0);
+
+    const diffTime = today.getTime() - actDate.getTime();
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) {
+      return alert(`ยังไม่ถึงวันจัดกิจกรรม! (กิจกรรมนี้กำหนดจัดวันที่ ${act.date})\nคุณสามารถส่งหลักฐานได้ตั้งแต่วันจัดกิจกรรมเป็นต้นไป`);
+    }
+    if (diffDays > 7) {
+      return alert(`หมดเวลาส่งหลักฐานแล้ว! (ต้องส่งภายใน 7 วันหลังวันจัดกิจกรรม)`);
+    }
+
+    if(Object.values(logsDB).some(l => l.activityId === actId && l.studentId === currentUser.studentId)) {
+      return alert('คุณได้ส่งหลักฐานกิจกรรมนี้ไปเรียบร้อยแล้ว');
+    }
+    currentJoiningActId = actId;
+    document.getElementById('proofFileInput').click();
+  }
+
+  window.saveActivityProof = function(proofDataUrl) {
+    const act = activitiesDB[currentJoiningActId];
+    push(ref(db, 'logs'), {
+      activityId: currentJoiningActId,
+      titleTh: act.titleTh,
+      hours: act.hours,
+      studentId: currentUser.studentId,
+      studentName: currentUser.name,
+      proof: proofDataUrl,
+      status: 'pending',
+      date: new Date().toLocaleDateString('th-TH')
+    }).then(() => {
+      alert('ส่งภาพหลักฐานสำเร็จ!');
+      currentJoiningActId = null;
+      renderApp();
+    });
+  }
+
+  window.filterMyHours = function(status) {
+    activeLogFilter = status;
+    ['All', 'Approved', 'Pending', 'Rejected'].forEach(s => {
+      const btn = document.getElementById('filterBtn' + s);
+      if (btn) btn.classList.remove('gold');
+    });
+    const activeBtn = document.getElementById('filterBtn' + status.charAt(0).toUpperCase() + status.slice(1));
+    if (activeBtn) activeBtn.classList.add('gold');
+    renderMyHours();
+  }
+
+  function renderMyHours() {
+    if (!currentUser) return;
+    
+    const infoEl = document.getElementById('myStudentInfo');
+    if (infoEl) {
+      infoEl.innerHTML = `👤 ชื่อ-นามสกุล: <strong>${currentUser.name}</strong> | 🆔 รหัสนักศึกษา: <strong>${currentUser.studentId}</strong> | ✉️ ${currentUser.email}`;
+    }
+
+    const myLogsAll = Object.entries(logsDB).filter(([id, log]) => {
+      return log.studentId === currentUser.studentId && activitiesDB[log.activityId];
+    });
+    
+    let approvedHours = 0;
+    myLogsAll.forEach(([id, log]) => {
+      if (log.status === 'approved') approvedHours += (parseFloat(log.hours) || 0);
+    });
+    
+    const elHours = document.getElementById('statTotalHours');
+    if (elHours) elHours.innerText = approvedHours;
+
+    const elTotalActs = document.getElementById('statTotalActivities');
+    if (elTotalActs) elTotalActs.innerText = myLogsAll.length;
+    
+    const myLogs = myLogsAll.filter(([id, log]) => {
+      if (activeLogFilter === 'all') return true;
+      return log.status === activeLogFilter;
+    });
+
+    if (myLogs.length === 0) {
+      document.getElementById('myHoursList').innerHTML = '<p style="text-align:center; padding:15px 0;">ไม่พบรายการกิจกรรมตามเงื่อนไขที่เลือก</p>';
+      return;
+    }
+
+    document.getElementById('myHoursList').innerHTML = myLogs.map(([id, log]) => {
+      const isRejected = log.status === 'rejected';
+      let statusBadge = log.status === 'approved' 
+        ? '<span style="color:var(--primary); background:var(--primary-light); padding:2px 8px; border-radius:12px; font-size:12px;">✅ อนุมัติแล้ว</span>' 
+        : log.status === 'rejected' 
+        ? `<span style="color:#C53030; background:#FED7D7; padding:2px 8px; border-radius:12px; font-size:12px;">❌ ไม่อนุมัติ (${log.rejectReason || 'ไม่ระบุเหตุผล'})</span>` 
+        : '<span style="color:#DD6B20; background:#FEEBC8; padding:2px 8px; border-radius:12px; font-size:12px;">⏳ รอตรวจสอบ</span>';
+
+      let evalBtnHtml = '';
+      if (log.status === 'approved') {
+        const myEval = Object.values(evaluationsDB).find(e => e.studentId === currentUser.studentId && e.activityId === log.activityId);
+        if (myEval) {
+          evalBtnHtml = `
+            <div style="font-size:11.5px; color:var(--primary); margin-top:2px;">
+              ⭐ ประเมินแล้ว (${myEval.rating}/5): "${myEval.comment}"
+            </div>
+            <button class="btn gold small no-print" style="margin-top:2px;" onclick="openEvalModal('${log.activityId}')">✏️ แก้ไขการประเมิน</button>
+          `;
+        } else {
+          evalBtnHtml = `
+            <button class="btn gold small no-print" style="margin-top:4px;" onclick="openEvalModal('${log.activityId}')">⭐ ประเมินกิจกรรม</button>
+          `;
+        }
+      }
+
+      return `
+        <div class="activity-item ${isRejected ? 'is-rejected' : ''}" style="align-items:flex-start;">
+          <div>
+            <h4 style="margin:0; color:var(--primary);">${log.titleTh}</h4>
+            <div style="font-size:12px; color:var(--text-secondary); margin-top:4px;">
+              📅 ${log.date || '-'} | ⏰ ${log.hours} ชม.<br>
+              สถานะ: ${statusBadge}
+            </div>
+          </div>
+          <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
+            ${evalBtnHtml}
+            <button class="btn danger small no-print" onclick="deleteMyLog('${id}')">🗑️ ลบประวัติ</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  window.openEvalModal = function(actId) {
+    const act = activitiesDB[actId];
+    if (!act) return;
+    document.getElementById('eval_actId').value = actId;
+    document.getElementById('evalModalTitle').innerText = 'ประเมินกิจกรรม: ' + act.titleTh;
+
+    const existingEval = Object.values(evaluationsDB).find(e => e.studentId === currentUser.studentId && e.activityId === actId);
+    if (existingEval) {
+      document.getElementById('eval_rating').value = existingEval.rating || '5';
+      document.getElementById('eval_comment').value = existingEval.comment || '';
+    } else {
+      document.getElementById('eval_rating').value = '5';
+      document.getElementById('eval_comment').value = '';
+    }
+
+    document.getElementById('evalModal').style.display = 'flex';
+  }
+
+  window.closeEvalModal = function() {
+    document.getElementById('evalModal').style.display = 'none';
+  }
+
+  window.handleSaveEvaluation = function(e) {
+    e.preventDefault();
+    const actId = document.getElementById('eval_actId').value;
+    const rating = parseInt(document.getElementById('eval_rating').value);
+    const comment = document.getElementById('eval_comment').value.trim();
+    const act = activitiesDB[actId];
+
+    let existingKey = null;
+    for (const [key, ev] of Object.entries(evaluationsDB)) {
+      if (ev.studentId === currentUser.studentId && ev.activityId === actId) {
+        existingKey = key;
+        break;
+      }
+    }
+
+    const evalData = {
+      activityId: actId,
+      titleTh: act ? act.titleTh : '',
+      studentId: currentUser.studentId,
+      studentName: currentUser.name,
+      rating: rating,
+      comment: comment,
+      timestamp: Date.now()
+    };
+
+    if (existingKey) {
+      update(ref(db, 'evaluations/' + existingKey), evalData).then(() => {
+        alert('อัปเดตการประเมินกิจกรรมเรียบร้อยแล้ว!');
+        closeEvalModal();
+      });
+    } else {
+      push(ref(db, 'evaluations'), evalData).then(() => {
+        alert('ส่งการประเมินกิจกรรมสำเร็จ ขอบคุณครับ!');
+        closeEvalModal();
+      });
+    }
+  }
+
+  window.deleteMyLog = function(logId) {
+    if (confirm('คุณต้องการลบประวัติการเข้าร่วมกิจกรรมนี้ออกใช่หรือไม่?')) {
+      set(ref(db, 'logs/' + logId), null).then(() => {
+        alert('ลบประวัติการเข้าร่วมกิจกรรมเรียบร้อยแล้ว');
+      }).catch(err => alert('เกิดข้อผิดพลาด: ' + err.message));
+    }
+  }
+
+  window.printOfficialDocument = function() {
+    if (!currentUser) return;
+    const nameSignEl = document.getElementById('printStudentNameSign');
+    if (nameSignEl) nameSignEl.innerText = currentUser.name;
+
+    const now = new Date();
+    const timeStr = now.toLocaleDateString('th-TH') + ' เวลา ' + now.toLocaleTimeString('th-TH') + ' น.';
+    document.getElementById('printTimeStamp').innerText = 'วันที่พิมพ์เอกสาร: ' + timeStr;
+
+    const verifyData = encodeURIComponent(`Verified Document | Student: ${currentUser.name} (${currentUser.studentId}) | JaiArsa System`);
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${verifyData}`;
+
+    const qrImg = document.getElementById('printQrCode');
+
+    const tempImg = new Image();
+    tempImg.onload = function() {
+      qrImg.src = qrUrl;
+      setTimeout(() => {
+        window.print();
+      }, 150);
+    };
+    tempImg.onerror = function() {
+      qrImg.src = qrUrl;
+      window.print();
+    };
+    tempImg.src = qrUrl;
+  }
+
+  // Loan Calculator
+  const KYS_RATES = [1.5, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0];
+  window.handleCalculateLoan = function(e) {
+    e.preventDefault();
+    const startYear = parseInt(document.getElementById('l_currentYear').value);
+    const targetYear = parseInt(document.getElementById('l_targetYear').value);
+    const tuition = parseFloat(document.getElementById('l_tuition').value) || 0;
+    const includeLiving = document.getElementById('l_includeLiving').checked;
+    
+    if (targetYear < startYear) return alert('ปีที่จบการศึกษาต้องไม่น้อยกว่าปีที่เริ่มกู้!');
+
+    let cumulativeDebt = (targetYear - startYear + 1) * ((tuition * 2) + (includeLiving ? 36000 : 0));
+    document.getElementById('resFutureDebt').textContent = cumulativeDebt.toLocaleString() + ' บาท';
+
+    let remainingPrincipal = cumulativeDebt, repaymentTableRowsHtml = '';
+    for (let year = 1; year <= 15; year++) {
+      const principalPayment = cumulativeDebt * (KYS_RATES[year - 1] / 100);
+      const interestPayment = remainingPrincipal * 0.01;
+      const totalYearlyPayment = principalPayment + interestPayment;
+      remainingPrincipal -= principalPayment;
+      if (remainingPrincipal < 0) remainingPrincipal = 0;
+      repaymentTableRowsHtml += `<tr><td>ปีที่ ${year}</td><td>${principalPayment.toLocaleString(undefined,{maximumFractionDigits:0})}</td><td>${interestPayment.toLocaleString(undefined,{maximumFractionDigits:0})}</td><td style="font-weight:700;">${totalYearlyPayment.toLocaleString(undefined,{maximumFractionDigits:0})}</td><td>${remainingPrincipal.toLocaleString(undefined,{maximumFractionDigits:0})}</td></tr>`;
+    }
+    document.getElementById('repaymentTableBody').innerHTML = repaymentTableRowsHtml;
+    document.getElementById('loanResults').style.display = 'block';
+  }
+</script>
+</body>
+</html>
