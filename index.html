@@ -1486,15 +1486,15 @@
     }).formatToParts(date);
     const value = type => parts.find(part => part.type === type)?.value;
 
-    return `${value('weekday')}ที่ ${value('day')} เดือน${value('month')} ปี${value('year')}`;
+    return `${value('weekday').replace('วัน', '')} ${value('day')} ${value('month')} ${value('year')}`;
   }
 
   function formatActivityTime(activity) {
     const startTime = activity.timeStart || activity.time;
     const endTime = activity.timeEnd;
 
-    if (!startTime) return 'เวลา -';
-    return endTime ? `เวลา ${startTime} - ${endTime} น.` : `เวลา ${startTime} น.`;
+    if (!startTime) return '-';
+    return endTime ? `${startTime} - ${endTime}` : startTime;
   }
 
   function renderUserActivities() { 
