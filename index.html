@@ -989,7 +989,8 @@
             <h4 style="margin:0 0 8px 0; color:var(--primary-dark); font-size:16px;">${a.titleTh}</h4>
             <div style="font-size:13px; color:var(--text-secondary); line-height:1.6;">
               <div>สถานที่: <strong>${a.location || '-'}</strong></div>
-              <div>${a.date} | ${a.timeStart || a.time} - ${a.timeEnd || '?'} น.</div>
+              <div>${formatActivityDate(a.date)}</div>
+              <div>${formatActivityTime(a)}</div>
               <div style="margin-top:6px;">${a.details || '-'}</div>
             </div>
           </div>
