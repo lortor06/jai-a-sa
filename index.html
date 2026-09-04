@@ -1466,6 +1466,36 @@
   }
 
   // User Functions
+  function formatActivityDate(dateValue) {
+    if (!dateValue) return '-';
+
+    let date;
+    if (dateValue instanceof Date) {
+      date = dateValue;
+    } else {
+      const [year, month, day] = dateValue.split('-').map(Number);
+      if (!year || !month || !day) return dateValue;
+      date = new Date(year, month - 1, day);
+    }
+    const parts = new Intl.DateTimeFormat('th-TH', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    }).formatToParts(date);
+    const value = type => parts.find(part => part.type === type)?.value;
+
+    return `${value('weekday')}ที่ ${value('day')} เดือน${value('month')} ปี${value('year')}`;
+  }
+
+  function formatActivityTime(activity) {
+    const startTime = activity.timeStart || activity.time;
+    const endTime = activity.timeEnd;
+
+    if (!startTime) return 'เวลา -';
+    return endTime ? `เวลา ${startTime} - ${endTime} น.` : `เวลา ${startTime} น.`;
+  }
+
   function renderUserActivities() { 
     const actArray = Object.entries(activitiesDB).sort((a,b) => b[1].timestamp - a[1].timestamp);
     if(actArray.length === 0) {
@@ -1495,10 +1525,10 @@
         dateNotice = `<span style="color:var(--primary); font-size:11.5px; display:block; margin-top:2px;">(ส่งหลักฐานเรียบร้อยแล้ว)</span>`;
       } else if (diffDays < 0) {
         btnHtml = `<button class="btn small" disabled style="background:#B0BEC5; cursor:not-allowed;">ยังไม่ถึงวันจัดกิจกรรม</button>`;
-        dateNotice = `<span style="color:var(--gold); font-size:11.5px; display:block; margin-top:2px;">(เปิดให้บันทึกในวันที่ ${a.date})</span>`;
+        dateNotice = `<span style="color:var(--gold); font-size:11.5px; display:block; margin-top:2px;">(เปิดให้บันทึกในวันที่ ${formatActivityDate(a.date)})</span>`;
       } else if (diffDays > 7) {
         btnHtml = `<button class="btn small danger" disabled style="cursor:not-allowed; opacity:0.6;">เลยกำหนด 7 วันแล้ว</button>`;
-        dateNotice = `<span style="color:var(--rust); font-size:11.5px; display:block; margin-top:2px;">(หมดเขตส่งเมื่อ ${new Date(actDate.getTime() + 7*24*60*60*1000).toLocaleDateString('th-TH')})</span>`;
+        dateNotice = `<span style="color:var(--rust); font-size:11.5px; display:block; margin-top:2px;">(หมดเขตส่งเมื่อ ${formatActivityDate(new Date(actDate.getTime() + 7 * 24 * 60 * 60 * 1000))})</span>`;
       } else {
         btnHtml = `<button class="btn small" onclick="joinActivity('${id}')" style="background:var(--primary);">ส่งภาพหลักฐาน</button>`;
         dateNotice = `<span style="color:var(--primary); font-size:11.5px; display:block; margin-top:2px;">(สามารถส่งหลักฐานได้อีก ${7 - diffDays} วัน)</span>`;
@@ -1511,7 +1541,8 @@
               <h4 style="margin:0 0 8px 0; color:var(--primary-dark); font-size:16px;">${a.titleTh}</h4>
               <div style="font-size:13px; color:var(--text-secondary); line-height:1.6;">
                 <div>สถานที่: <strong>${a.location || '-'}</strong></div>
-                <div>${a.date} | ${a.timeStart || a.time} - ${a.timeEnd || '?'} น.</div>
+                <div>${formatActivityDate(a.date)}</div>
+                <div>${formatActivityTime(a)}</div>
                 <div style="margin-top:6px;">${a.details || '-'}</div>
                 ${dateNotice}
               </div>
