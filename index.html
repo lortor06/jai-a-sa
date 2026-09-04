@@ -1058,22 +1058,36 @@
     
     KMITL_DATA.loading = true;
     try {
-      // Try official KMITL API first
-      const response = await fetch('https://curriculum.kmitl.ac.th/api/v1/faculties', {
-        method: 'GET',
-        headers: { 'Accept': 'application/json' }
-      });
-      
-      if(response.ok) {
-        const data = await response.json();
-        KMITL_DATA.faculties = data.map(fac => ({
-          id: fac.id || fac.code,
-          name: fac.name_th || fac.name,
-          branches: (fac.programs || fac.branches || []).map(prog => ({
-            id: prog.id || prog.code,
-            name: prog.name_th || prog.name
-          }))
-        }));
+      // Load the official faculty and program collections when the API is available.
+      const [facultyResponse, departmentResponse, majorResponse] = await Promise.all([
+        fetch('https://admin.curriculum.kmitl.ac.th/api/faculties?locale=th&depth=0&limit=100'),
+        fetch('https://admin.curriculum.kmitl.ac.th/api/departments?locale=th&depth=0&limit=100'),
+        fetch('https://admin.curriculum.kmitl.ac.th/api/majors?locale=th&depth=0&limit=1000')
+      ]);
+
+      if (facultyResponse.ok && departmentResponse.ok && majorResponse.ok) {
+        const [facultyData, departmentData, majorData] = await Promise.all([
+          facultyResponse.json(),
+          departmentResponse.json(),
+          majorResponse.json()
+        ]);
+        const departments = departmentData.docs || [];
+        const majors = majorData.docs || [];
+        const linkedIds = value => Array.isArray(value) ? value.map(item => typeof item === 'object' ? item.id : item) : [];
+
+        KMITL_DATA.faculties = (facultyData.docs || []).map(faculty => {
+          const facultyId = faculty.id;
+          const departmentIds = departments
+            .filter(department => linkedIds(department.academic_units?.faculties).includes(facultyId))
+            .map(department => department.id);
+          const branches = majors.filter(major => {
+            const units = major.academic_units || {};
+            return linkedIds(units.faculties).includes(facultyId) ||
+              linkedIds(units.departments).some(departmentId => departmentIds.includes(departmentId));
+          }).map(major => ({ id: major.id, name: major.title }));
+
+          return { id: facultyId, name: faculty.title, branches };
+        });
         console.log('KMITL API loaded successfully');
         KMITL_DATA.loading = false;
         return;
@@ -1161,6 +1175,68 @@
           {id: 'hort', name: 'สวนศาสตร์'},
           {id: 'prd', name: 'วิทยาศาสตร์และเทคโนโลยีการผลิต'},
           {id: 'aq', name: 'ประมงศาสตร์'}
+        ]
+      },
+      {
+        id: 'it',
+        name: 'คณะเทคโนโลยีสารสนเทศ',
+        branches: [
+          {id: 'it', name: 'เทคโนโลยีสารสนเทศ'},
+          {id: 'bit', name: 'เทคโนโลยีสารสนเทศทางธุรกิจ'},
+          {id: 'dsba', name: 'วิทยาการข้อมูลและการวิเคราะห์เชิงธุรกิจ'},
+          {id: 'ai', name: 'เทคโนโลยีปัญญาประดิษฐ์'},
+          {id: 'se', name: 'วิศวกรรมซอฟต์แวร์'}
+        ]
+      },
+      {
+        id: 'food',
+        name: 'คณะอุตสาหกรรมอาหาร',
+        branches: [
+          {id: 'fst', name: 'วิทยาศาสตร์และเทคโนโลยีการอาหาร'},
+          {id: 'fpe', name: 'วิศวกรรมแปรรูปอาหาร'},
+          {id: 'culinary', name: 'วิทยาศาสตร์การประกอบอาหารและการจัดการบริการอาหาร'},
+          {id: 'biotech', name: 'เทคโนโลยีชีวภาพทางอาหาร'},
+          {id: 'food-safety', name: 'ความปลอดภัยอาหาร'},
+          {id: 'food-innovation', name: 'นวัตกรรมอาหาร'}
+        ]
+      },
+      {
+        id: 'liberal',
+        name: 'คณะศิลปศาสตร์',
+        branches: [
+          {id: 'english', name: 'ภาษาอังกฤษเพื่อการสื่อสารธุรกิจ'},
+          {id: 'chinese', name: 'ภาษาจีนเพื่ออุตสาหกรรม'},
+          {id: 'japanese', name: 'ภาษาญี่ปุ่นธุรกิจ'},
+          {id: 'tourism', name: 'นวัตกรรมการท่องเที่ยวและการบริการ'},
+          {id: 'psychology', name: 'จิตวิทยาอุตสาหกรรมและองค์การ'}
+        ]
+      },
+      {
+        id: 'medicine',
+        name: 'คณะแพทยศาสตร์',
+        branches: [
+          {id: 'md', name: 'แพทยศาสตรบัณฑิต (นานาชาติ)'}
+        ]
+      },
+      {
+        id: 'dentistry',
+        name: 'คณะทันตแพทยศาสตร์',
+        branches: [
+          {id: 'dds', name: 'ทันตแพทยศาสตรบัณฑิต'}
+        ]
+      },
+      {
+        id: 'nursing',
+        name: 'คณะพยาบาลศาสตร์',
+        branches: [
+          {id: 'bns', name: 'พยาบาลศาสตรบัณฑิต'}
+        ]
+      },
+      {
+        id: 'integrated-technology',
+        name: 'คณะเทคโนโลยีบูรณาการ',
+        branches: [
+          {id: 'integrated-technology', name: 'เทคโนโลยีบูรณาการ'}
         ]
       }
     ];
